@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rests xmlns="http://camel.apache.org/schema/spring">
+  <rest>
+    <get uri="/openapi.json">
+      <description>Returns the OpenAPI specification for this service</description>
+      <route>
+        <setHeader headerName="Content-Type">
+          <constant>application/vnd.oai.openapi+json</constant>
+        </setHeader>
+        <setBody>
+          <constant>resource:classpath:openapi.json</constant>
+        </setBody>
+      </route>
+    </get>
+  </rest>
+</rests>

@@ -160,8 +160,6 @@ public class CamelKPublishHandlerTest {
         io.syndesis.server.controller.integration.camelk.crd.Integration i = handler.createIntegrationCR(deployment);
 
         assertThat(i.getSpec().getSources()).isNotEmpty();
-        assertThat(i.getSpec().getDependencies()).isNotEmpty();
-        assertThat(i.getSpec().getDependencies()).anyMatch(s -> s.startsWith("bom:io.syndesis.integration/integration-bom-camel-k/pom/"));
         assertThat(i.getSpec().getResources()).isNotEmpty();
         assertThat(i.getSpec().getResources()).anyMatch(r -> "mapping-flow-0-step-1.json".equals(r.getDataSpec().getName()));
     }
@@ -186,10 +184,12 @@ public class CamelKPublishHandlerTest {
 
         io.syndesis.server.controller.integration.camelk.crd.Integration i = handler.createIntegrationCR(deployment);
 
-        assertThat(i.getSpec().getConfiguration()).anyMatch(r -> {
-            return Objects.equals("property", r.getType())
-                && Objects.equals("camel.k.customizer=" + String.join(",", CamelKPublishHandler.DEFAULT_CUSTOMIZERS), r.getValue());
-        });
+        for (String customizerId: CamelKPublishHandler.DEFAULT_CUSTOMIZERS) {
+            assertThat(i.getSpec().getConfiguration()).anyMatch(r -> {
+                return Objects.equals("property", r.getType())
+                    && Objects.equals("customizer." + customizerId + ".enabled=true", r.getValue());
+            });
+        }
     }
 
     @Test
@@ -215,9 +215,11 @@ public class CamelKPublishHandlerTest {
 
         io.syndesis.server.controller.integration.camelk.crd.Integration i = handler.createIntegrationCR(deployment);
 
-        assertThat(i.getSpec().getConfiguration()).anyMatch(r -> {
-            return Objects.equals("property", r.getType())
-                && Objects.equals("camel.k.customizer=" + String.join(",", properties.getCamelk().getCustomizers()), r.getValue());
-        });
+        for (String customizerId: properties.getCamelk().getCustomizers()) {
+            assertThat(i.getSpec().getConfiguration()).anyMatch(r -> {
+                return Objects.equals("property", r.getType())
+                    && Objects.equals("customizer." + customizerId + ".enabled=true", r.getValue());
+            });
+        }
     }
 }
