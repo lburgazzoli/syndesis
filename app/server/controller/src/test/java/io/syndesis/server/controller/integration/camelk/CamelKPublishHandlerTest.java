@@ -106,7 +106,6 @@ public class CamelKPublishHandlerTest {
             generator,
             null,
             manager,
-            new VersionService(),
             Collections.emptyList(),
             new ControllersConfigurationProperties());
 
@@ -153,7 +152,6 @@ public class CamelKPublishHandlerTest {
             generator,
             null,
             manager,
-            new VersionService(),
             Collections.emptyList(),
             new ControllersConfigurationProperties());
 
@@ -178,7 +176,6 @@ public class CamelKPublishHandlerTest {
             generator,
             null,
             manager,
-            new VersionService(),
             Collections.emptyList(),
             new ControllersConfigurationProperties());
 
@@ -209,7 +206,6 @@ public class CamelKPublishHandlerTest {
             generator,
             null,
             manager,
-            new VersionService(),
             Collections.emptyList(),
             properties);
 

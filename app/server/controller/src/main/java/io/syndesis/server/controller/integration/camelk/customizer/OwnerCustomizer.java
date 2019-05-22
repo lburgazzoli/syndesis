@@ -15,6 +15,12 @@
  */
 package io.syndesis.server.controller.integration.camelk.customizer;
 
+import io.syndesis.server.controller.integration.camelk.crd.Integration;
+import io.syndesis.server.controller.integration.camelk.crd.IntegrationTraitSpec;
+import io.syndesis.server.openshift.Exposure;
+import io.syndesis.server.openshift.OpenShiftService;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,18 +29,12 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
-import io.syndesis.server.controller.integration.camelk.crd.Integration;
-import io.syndesis.server.controller.integration.camelk.crd.IntegrationTraitSpec;
-import io.syndesis.server.openshift.Exposure;
-import io.syndesis.server.openshift.OpenShiftService;
-import org.springframework.stereotype.Component;
-
 /**
  * Configure owner trait
  */
 @Component
 public class OwnerCustomizer extends AbstractTraitCustomizer {
-    public static final Collection<String> LABELS = Arrays.asList(
+    public static final Collection<String> LABELS = Collections.unmodifiableCollection(Arrays.asList(
         OpenShiftService.COMPONENT_LABEL,
         OpenShiftService.INTEGRATION_ID_LABEL,
         OpenShiftService.DEPLOYMENT_VERSION_LABEL,
@@ -42,22 +42,22 @@ public class OwnerCustomizer extends AbstractTraitCustomizer {
         OpenShiftService.INTEGRATION_NAME_LABEL,
         "syndesis.io/type",
         "syndesis.io/app"
-    );
+    ));
 
-    public static final Collection<String> LABELS_3SCALE = Arrays.asList(
+    public static final Collection<String> LABELS_3SCALE = Collections.unmodifiableCollection(Arrays.asList(
         "discovery.3scale.net"
-    );
+    ));
 
-    public static final Collection<String> ANNOTATIONS= Arrays.asList(
+    public static final Collection<String> ANNOTATIONS= Collections.unmodifiableCollection(Arrays.asList(
         "prometheus.io/port",
         "prometheus.io/scrape"
-    );
+    ));
 
-    public static final Collection<String> ANNOTATIONS_3SCALE= Arrays.asList(
+    public static final Collection<String> ANNOTATIONS_3SCALE= Collections.unmodifiableCollection(Arrays.asList(
         "discovery.3scale.net/scheme",
         "discovery.3scale.net/port",
         "discovery.3scale.net/description-path"
-    );
+    ));
 
     @Override
     protected Map<String, IntegrationTraitSpec> computeTraits(Integration integration, EnumSet<Exposure> exposure) {

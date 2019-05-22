@@ -15,19 +15,6 @@
  */
 package io.syndesis.server.controller.integration.camelk;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -59,12 +46,24 @@ import io.syndesis.server.controller.integration.camelk.crd.SourceSpec;
 import io.syndesis.server.controller.integration.camelk.customizer.CamelKIntegrationCustomizer;
 import io.syndesis.server.dao.IntegrationDao;
 import io.syndesis.server.dao.IntegrationDeploymentDao;
-import io.syndesis.server.endpoint.v1.VersionService;
 import io.syndesis.server.openshift.Exposure;
 import io.syndesis.server.openshift.OpenShiftService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component
 @Qualifier("camel-k")
@@ -84,7 +83,6 @@ public class CamelKPublishHandler extends BaseCamelKHandler implements StateChan
         IntegrationProjectGenerator projectGenerator,
         IntegrationPublishValidator validator,
         IntegrationResourceManager resourceManager,
-        VersionService versionService,
         List<CamelKIntegrationCustomizer> customizers,
         ControllersConfigurationProperties configuration) {
         super(openShiftService, iDao, idDao, validator);
@@ -204,15 +202,16 @@ public class CamelKPublishHandler extends BaseCamelKHandler implements StateChan
     }
 
     protected io.syndesis.server.controller.integration.camelk.crd.Integration applyCustomizers(IntegrationDeployment integrationDeployment, io.syndesis.server.controller.integration.camelk.crd.Integration integration) {
+        io.syndesis.server.controller.integration.camelk.crd.Integration result = integration;
         if (this.customizers != null && !this.customizers.isEmpty()) {
             EnumSet<Exposure> exposures = CamelKSupport.determineExposure(configuration, integrationDeployment);
 
             for (CamelKIntegrationCustomizer customizer : this.customizers) {
-                integration = customizer.customize(integrationDeployment, integration, exposures);
+                result = customizer.customize(integrationDeployment, integration, exposures);
             }
         }
 
-        return integration;
+        return result;
     }
 
     @SuppressWarnings({"PMD.ExcessiveMethodLength"})
@@ -264,14 +263,13 @@ public class CamelKPublishHandler extends BaseCamelKHandler implements StateChan
             integrationSpecBuilder.addConfiguration(new ConfigurationSpec.Builder().type("env").value(k + "=" + v).build());
         });
 
-
-        //TODO: make all this configurable, where makes sense
         for (String customizerId: customizers) {
             integrationSpecBuilder.addConfiguration(new ConfigurationSpec.Builder()
                 .type("property")
                 .value("customizer." + customizerId + ".enabled=true")
                 .build());
         }
+        //TODO: make all this configurable, where makes sense
         integrationSpecBuilder.addConfiguration(new ConfigurationSpec.Builder()
             .type("env")
             .value("AB_JMX_EXPORTER_CONFIG=/etc/camel/resources/prometheus-config.yml")
