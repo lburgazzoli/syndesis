@@ -21,6 +21,8 @@ import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Objects;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import io.syndesis.common.model.Kind;
 import io.syndesis.common.model.ResourceIdentifier;
 import io.syndesis.common.model.integration.Integration;
@@ -68,12 +70,15 @@ public class OpenApiCustomizerTest {
 
         assertThat(i.getSpec().getSources()).anyMatch(
             s -> Objects.equals("openapi-routes", s.getDataSpec().getName()) && Objects.equals("xml", s.getLanguage())
+                && !s.getDataSpec().getCompression().booleanValue()
         );
         assertThat(i.getSpec().getSources()).anyMatch(
             s -> Objects.equals("openapi-endpoint", s.getDataSpec().getName()) && Objects.equals("xml", s.getLanguage())
+                && !s.getDataSpec().getCompression().booleanValue()
         );
         assertThat(i.getSpec().getResources()).anyMatch(
             s -> Objects.equals("openapi.json", s.getDataSpec().getName()) && Objects.equals("openapi", s.getType())
+                && s.getDataSpec().getCompression().booleanValue() && (s.getDataSpec().getContent().getBytes(UTF_8).length <= content.length)
         );
     }
 }

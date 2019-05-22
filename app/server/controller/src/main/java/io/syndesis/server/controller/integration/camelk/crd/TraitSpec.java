@@ -37,6 +37,6 @@ public interface TraitSpec {
         return Collections.emptyMap();
     }
 
-    class Builder extends ImmutableIntegrationTraitSpec.Builder {
+    class Builder extends ImmutableTraitSpec.Builder {
     }
 }

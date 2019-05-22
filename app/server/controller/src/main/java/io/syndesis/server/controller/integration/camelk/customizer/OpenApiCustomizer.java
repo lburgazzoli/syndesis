@@ -99,14 +99,15 @@ public class OpenApiCustomizer implements CamelKIntegrationCustomizer {
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private ResourceSpec generateOpenAPIResource(OpenApi openApi) throws Exception {
+        //we always compress open api definition
         final byte[] openApiBytes = openApi.getDocument();
-        final String content = configuration.getCamelk().isCompression() ? CamelKSupport.compress(openApiBytes) : new String(openApiBytes, UTF_8);
+        final String compressedContent = CamelKSupport.compress(openApiBytes);
 
         return new ResourceSpec.Builder()
             .dataSpec(new DataSpec.Builder()
                 .compression(true)
                 .name("openapi.json")
-                .content(content)
+                .content(compressedContent)
                 .build())
             .type("openapi")
             .build();
@@ -116,7 +117,8 @@ public class OpenApiCustomizer implements CamelKIntegrationCustomizer {
     private SourceSpec generateOpenAPIRestDSL(OpenApi openApi) throws Exception {
         final byte[] openApiBytes = openApi.getDocument();
         final Swagger swagger = OpenApiHelper.parse(new String(openApiBytes, UTF_8));
-        final String content = RestDslXmlGenerator.toXml(ProjectGeneratorHelper.normalizePaths(swagger)).generate(new DefaultCamelContext());
+        final String camelRestDsl = RestDslXmlGenerator.toXml(ProjectGeneratorHelper.normalizePaths(swagger)).generate(new DefaultCamelContext());
+        final String content = configuration.getCamelk().isCompression() ? CamelKSupport.compress(camelRestDsl) : camelRestDsl;
 
         return new SourceSpec.Builder()
             .dataSpec(new DataSpec.Builder()
@@ -131,10 +133,12 @@ public class OpenApiCustomizer implements CamelKIntegrationCustomizer {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private SourceSpec generateOpenAPIRestEndpoint() throws Exception {
         try (InputStream is = CamelKPublishHandler.class.getResourceAsStream("/expose-openapi-document.xml")) {
+            String oepnApiEndpointXml = IOUtils.toString(is, UTF_8);
+            final String content = configuration.getCamelk().isCompression() ? CamelKSupport.compress(oepnApiEndpointXml) : oepnApiEndpointXml;
             return new SourceSpec.Builder()
                 .dataSpec(new DataSpec.Builder()
                     .compression(configuration.getCamelk().isCompression())
-                    .content(IOUtils.toString(is, UTF_8))
+                    .content(content)
                     .name("openapi-endpoint")
                     .build())
                 .language("xml")
